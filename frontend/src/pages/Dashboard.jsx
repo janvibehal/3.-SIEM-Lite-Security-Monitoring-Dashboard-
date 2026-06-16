@@ -17,6 +17,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Toast, useToast } from "../components/ui/Toast";
 
+
 // ── Static mock data (replace with real API calls) ────────────────────
 const MOCK_STATS = [
   { label: "Events / sec",    value: "4,218",  delta: "+12%",  up: true,  icon: "pulse"   },
