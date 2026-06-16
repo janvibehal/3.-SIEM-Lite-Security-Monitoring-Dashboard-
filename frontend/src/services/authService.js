@@ -6,7 +6,12 @@
  * Base URL: /api/v1/auth  (server.ts: app.use("/api/v1/auth", authRoutes))
  */
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const BASE_URL = import.meta.env.VITE_API_URL;
+
+if (!BASE_URL) {
+  throw new Error("VITE_API_URL is not configured");
+}
+
 const AUTH_BASE = `${BASE_URL}/api/v1/auth`;
 
 /**

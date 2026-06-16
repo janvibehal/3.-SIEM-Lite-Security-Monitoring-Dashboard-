@@ -110,8 +110,8 @@ export default function Register() {
   // ── Render ────────────────────────────────────────────────────────────
   return (
     <AuthLayout
-      title="Request access"
-      subtitle="Create your SOC operator account to get started."
+      title="Create Account >> Request Access"
+      subtitle="Create your viewer account to get started."
     >
       <form onSubmit={handleSubmit} noValidate className="space-y-5">
         {/* Email */}
@@ -138,7 +138,7 @@ export default function Register() {
           onChange={handleChange}
           error={errors.username}
           hint="3–50 characters. Used to sign in."
-          placeholder="soc_analyst_01"
+          placeholder="analyst_01"
           autoComplete="username"
           required
           disabled={loading}

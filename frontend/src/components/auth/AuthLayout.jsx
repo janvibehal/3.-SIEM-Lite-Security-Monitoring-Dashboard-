@@ -14,7 +14,7 @@ export default function AuthLayout({ children, title, subtitle }) {
           <div className="flex items-center gap-2.5 mb-8">
             <SiemIcon />
             <span className="text-xs font-mono tracking-widest text-slate-500 uppercase">
-              siem-lite / soc
+              siem-lite / dtl soc
             </span>
           </div>
 
@@ -43,12 +43,12 @@ export default function AuthLayout({ children, title, subtitle }) {
 /* ── SIEM brand icon ─────────────────────────────────────────────────── */
 function SiemIcon() {
   return (
-    <div className="w-8 h-8 rounded bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-        <path d="M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"
-          stroke="#22d3ee" strokeWidth="1.5" strokeLinejoin="round" />
-        <path d="M9 12l2 2 4-4" stroke="#22d3ee" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
+    <div className="w-10 h-10 rounded bg-white/80 border border-cyan-500/30  flex items-center justify-center">
+      <img
+        src="/dtl-logo.png"
+        alt="DTL Logo"
+        className="w-10  object-contain"
+      />
     </div>
   );
 }
@@ -81,11 +81,17 @@ function ThreatMapVisual() {
       {/* Grid background */}
       <div
         className="absolute inset-0 opacity-5"
+        
         style={{
           backgroundImage: "linear-gradient(#22d3ee 1px, transparent 1px), linear-gradient(90deg, #22d3ee 1px, transparent 1px)",
           backgroundSize: "40px 40px",
         }}
       />
+      <img
+  src="/dtl-logo.png"
+  alt=""
+  className="absolute inset-0 m-auto w-[500px] h-[500px] object-contain opacity-[0.09] pointer-events-none select-none z-0"
+/>
 
       {/* Corner accent */}
       <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl" />
