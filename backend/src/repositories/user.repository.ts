@@ -13,6 +13,7 @@ export class UserRepository {
     });
   }
 
+  // Additional method to find user by tokenId
   findById(id: string) {
     return prisma.user.findUnique({
       where: { id },
@@ -34,6 +35,17 @@ export class UserRepository {
     return prisma.user.update({
       where: { id },
       data,
+    });
+  }
+
+  verifyEmail(userId: string) {
+    return prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        emailVerified: true,
+      },
     });
   }
 }

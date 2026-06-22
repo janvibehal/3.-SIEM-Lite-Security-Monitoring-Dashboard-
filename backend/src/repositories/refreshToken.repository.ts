@@ -16,6 +16,15 @@ export class RefreshTokenRepository {
     });
   }
 
+  revoke(id: string) {
+    return prisma.refreshToken.update({
+      where: { id },
+      data: {
+        isRevoked: true,
+      },
+    });
+  }
+
   revokeAll(userId: string) {
     return prisma.refreshToken.updateMany({
       where: { userId },

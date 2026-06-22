@@ -1,14 +1,14 @@
 import { prisma } from "../config/database.config";
 
-export class PasswordResetRepository {
+export class EmailVerificationRepository {
   create(data: any) {
-    return prisma.passwordResetToken.create({
+    return prisma.emailVerificationToken.create({
       data,
     });
   }
 
   findByUserId(userId: string) {
-    return prisma.passwordResetToken.findMany({
+    return prisma.emailVerificationToken.findMany({
       where: {
         userId,
         used: false,
@@ -16,16 +16,17 @@ export class PasswordResetRepository {
     });
   }
   // Additional method to find unused tokens
+  //
   findUnusedTokens() {
-  return prisma.passwordResetToken.findMany({
-    where: {
-      used: false,
-    },
-  });
-}
+    return prisma.emailVerificationToken.findMany({
+      where: {
+        used: false,
+      },
+    });
+  }
 
   markUsed(id: string) {
-    return prisma.passwordResetToken.update({
+    return prisma.emailVerificationToken.update({
       where: { id },
       data: {
         used: true,

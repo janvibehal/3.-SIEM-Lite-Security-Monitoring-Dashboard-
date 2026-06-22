@@ -10,6 +10,16 @@ import { signAccessToken, signRefreshToken } from "../utils/jwt.utils";
 
 import { generateOrganizationId } from "../utils/organization.utils";
 
+import { verifyRefreshToken } from "../utils/jwt.utils";
+
+import { EmailVerificationRepository } from "../repositories/emailVerification.repository";
+
+import { sendVerificationEmail } from "./email.service";
+
+import { sendPasswordResetEmail } from "./email.service";
+
+import { AuditService } from "./audit.service";
+
 import {
   ConflictError,
   UnauthorizedError,
@@ -29,6 +39,8 @@ export class AuthService {
     private userRepository = new UserRepository(),
     private refreshTokenRepository = new RefreshTokenRepository(),
     private passwordResetRepository = new PasswordResetRepository(),
+    private emailVerificationRepository = new EmailVerificationRepository(),
+    private auditService = new AuditService(),
   ) {}
 
   //Method 1: generateTokenPair()
@@ -100,7 +112,7 @@ export class AuthService {
 
     // console.log("REGISTER DATA:", data);
     // console.log("USER REPO:", this.userRepository);
-    
+
     const existingEmail = await this.userRepository.findByEmail(data.email);
 
     if (existingEmail) {
@@ -124,6 +136,23 @@ export class AuthService {
       organizationId: generateOrganizationId(),
     });
 
+    
+
+    // Send verification email after user creation
+    await this.sendEmailVerification(user.id);
+    
+    // Log user registration event
+    // In a real application, you might want to include more details like IP address, user agent, etc.
+    await this.auditService.log({
+      userId: user.id,
+      action: "USER_REGISTERED",
+      metadata: {
+        ipAddress: req.ip,
+        userAgent: req.get("User-Agent"),
+      },
+    });
+
+    // Return only necessary user info to avoid exposing sensitive data
     return {
       id: user.id,
       email: user.email,
@@ -152,6 +181,17 @@ export class AuthService {
     if (!validPassword) {
       await this.incrementFailedAttempts(user);
 
+      // Log failed login attempt
+      // In a real application, you might want to include more details like IP address, user agent, etc.
+      await this.auditService.log({
+        userId: user.id,
+        action: "LOGIN_FAILED",
+        metadata: {
+          ipAddress: req.ip,
+          userAgent: req.get("User-Agent"),
+        },
+      });
+
       throw new UnauthorizedError("Invalid credentials");
     }
 
@@ -159,6 +199,11 @@ export class AuthService {
       loginAttempts: 0,
       lockUntil: null,
       lastLogin: new Date(),
+    });
+
+    await this.auditService.log({
+      userId: user.id,
+      action: "LOGIN_SUCCESS",
     });
 
     const tokens = await this.generateTokenPair({
@@ -185,5 +230,247 @@ export class AuthService {
         role: user.role,
       },
     };
+  }
+
+  //Method 6: RefreshToken()
+  async refresh(refreshToken: string) {
+    if (!refreshToken) {
+      throw new UnauthorizedError("Refresh token required");
+    }
+
+    const payload = verifyRefreshToken(refreshToken);
+
+    const storedTokens = await this.refreshTokenRepository.findByUserId(
+      payload.id,
+    );
+
+    let matchedToken = null;
+
+    for (const tokenRecord of storedTokens) {
+      const matches = await comparePassword(
+        refreshToken,
+        tokenRecord.tokenHash,
+      );
+
+      if (matches) {
+        matchedToken = tokenRecord;
+        break;
+      }
+    }
+
+    if (!matchedToken) {
+      throw new UnauthorizedError("Invalid refresh token");
+    }
+
+    if (matchedToken.expiresAt < new Date()) {
+      throw new UnauthorizedError("Refresh token expired");
+    }
+
+    await this.refreshTokenRepository.revoke(matchedToken.id);
+
+    const user = await this.userRepository.findById(payload.id);
+
+    if (!user) {
+      throw new NotFoundError("User not found");
+    }
+
+    const tokens = await this.generateTokenPair({
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      organizationId: user.organizationId,
+    });
+
+    const refreshHash = await hashPassword(tokens.refreshToken);
+
+    await this.refreshTokenRepository.create({
+      userId: user.id,
+      tokenHash: refreshHash,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    });
+
+    await this.auditService.log({
+      userId: user.id,
+      action: "TOKEN_REFRESHED",
+    });
+
+    return tokens;
+  }
+
+  //Method 7: logout()
+  async logout(refreshToken: string) {
+    if (!refreshToken) {
+      throw new UnauthorizedError("Refresh token required");
+    }
+
+    const payload = verifyRefreshToken(refreshToken);
+
+    const storedTokens = await this.refreshTokenRepository.findByUserId(
+      payload.id,
+    );
+
+    let matchedToken = null;
+
+    for (const tokenRecord of storedTokens) {
+      const matches = await comparePassword(
+        refreshToken,
+        tokenRecord.tokenHash,
+      );
+
+      if (matches) {
+        matchedToken = tokenRecord;
+        break;
+      }
+    }
+
+    if (!matchedToken) {
+      throw new UnauthorizedError("Invalid refresh token");
+    }
+
+    await this.refreshTokenRepository.revoke(matchedToken.id);
+
+    await this.auditService.log({
+      userId: payload.id,
+      action: "LOGOUT",
+    });
+
+    return {
+      success: true,
+    };
+  }
+
+  async logoutAll(userId: string) {
+    await this.refreshTokenRepository.revokeAll(userId);
+
+    await this.auditService.log({
+      userId,
+      action: "LOGOUT_ALL",
+    });
+
+    return {
+      success: true,
+    };
+  }
+
+  //Method 8: sendEmailVerification()
+  //This Method is used to send an email verification token to the user's email address.
+  // It first checks if the user exists and if their email is already verified.
+  // If not, it generates a random token, hashes it, and stores it in the database with an expiration time.
+  // Finally, it sends the verification email to the user.
+  async sendEmailVerification(userId: string) {
+    const user = await this.userRepository.findById(userId);
+
+    if (!user) {
+      throw new NotFoundError("User not found");
+    }
+
+    if (user.emailVerified) {
+      return;
+    }
+
+    const token = crypto.randomBytes(32).toString("hex");
+
+    const tokenHash = await hashPassword(token);
+
+    await this.emailVerificationRepository.create({
+      userId: user.id,
+      tokenHash,
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    });
+
+    await sendVerificationEmail(user.email, token);
+  }
+  //Method 9: verifyEmail()
+  //This Method is used to verify the email of the user. It checks if the provided token is valid and not expired, marks it as used, and updates the user's email verification status.
+  // If the token is invalid or expired, it throws an UnauthorizedError.
+  async verifyEmail(token: string) {
+    if (!token) {
+      throw new UnauthorizedError("Verification token required");
+    }
+
+    const verificationTokens =
+      await this.emailVerificationRepository.findUnusedTokens();
+
+    for (const verificationToken of verificationTokens) {
+      const matches = await comparePassword(token, verificationToken.tokenHash);
+
+      if (!matches) {
+        continue;
+      }
+
+      if (verificationToken.expiresAt < new Date()) {
+        throw new UnauthorizedError("Verification token expired");
+      }
+
+      await this.emailVerificationRepository.markUsed(verificationToken.id);
+
+      await this.userRepository.verifyEmail(verificationToken.userId);
+
+      await this.auditService.log({
+        userId: verificationToken.userId,
+        action: "EMAIL_VERIFIED",
+      });
+
+      return {
+        success: true,
+      };
+    }
+
+    throw new UnauthorizedError("Invalid verification token");
+  }
+
+  async forgotPassword(email: string) {
+    const user = await this.userRepository.findByEmail(email);
+
+    if (!user) {
+      return;
+    }
+
+    const token = crypto.randomBytes(32).toString("hex");
+
+    const tokenHash = await hashPassword(token);
+
+    await this.passwordResetRepository.create({
+      userId: user.id,
+      tokenHash,
+      expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+    });
+
+    await sendPasswordResetEmail(user.email, token);
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    const resetTokens = await this.passwordResetRepository.findUnusedTokens();
+
+    for (const resetToken of resetTokens) {
+      const matches = await comparePassword(token, resetToken.tokenHash);
+
+      if (!matches) {
+        continue;
+      }
+
+      if (resetToken.expiresAt < new Date()) {
+        throw new UnauthorizedError("Reset token expired");
+      }
+
+      const passwordHash = await hashPassword(newPassword);
+
+      await this.userRepository.update(resetToken.userId, {
+        passwordHash,
+      });
+
+      await this.passwordResetRepository.markUsed(resetToken.id);
+
+      await this.refreshTokenRepository.revokeAll(resetToken.userId);
+
+      await this.auditService.log({
+        userId: resetToken.userId,
+        action: "PASSWORD_RESET",
+      });
+
+      return;
+    }
+
+    throw new UnauthorizedError("Invalid reset token");
   }
 }

@@ -99,6 +99,41 @@ export class AuthController {
     }
   };
 
+  logoutAll = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      await this.authService.logoutAll(req.user.id);
+
+      res.clearCookie("siem_refresh_token");
+
+      return res.status(200).json({
+        message: "Logged out from all devices",
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  verifyEmail = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const token =
+      req.query.token as string;
+
+    await this.authService.verifyEmail(
+      token,
+    );
+
+    return res.status(200).json({
+      message: "Email verified successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
   me = async (req: Request, res: Response, next: NextFunction) => {
     try {
       return res.status(200).json({

@@ -1,11 +1,10 @@
-import { User } from "@prisma/client";
+import { AccessTokenPayload }
+  from "../utils/jwt.utils";
 
 declare global {
   namespace Express {
     interface Request {
-      user?: User;
+      user?: AccessTokenPayload;
     }
   }
 }
-
-export {};

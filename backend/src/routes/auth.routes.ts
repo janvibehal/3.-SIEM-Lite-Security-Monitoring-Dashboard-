@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { AuthController } from "../controllers/auth.controller";
 import { AuthService } from "../services/auth.service";
+import { authenticate } from "../middleware/auth.middleware";
 
 const router = Router();
 
@@ -11,8 +12,8 @@ router.post("/register", authController.register);
 
 router.post("/login", authController.login);
 
-// We'll wire these later after middleware is ready
 router.post("/logout", authController.logout);
+
 router.post("/refresh", authController.refresh);
 
 router.post(
@@ -24,7 +25,22 @@ router.post(
   "/reset-password",
   authController.resetPassword
 );
+ // New route for logging out from all sessions
+router.post(
+  "/logout-all",
+  authenticate, // Ensure the user is authenticated before allowing logout from all sessions
+  authController.logoutAll,
+);
 
-router.get("/me", authController.me);
+router.get(
+  "/verify-email",
+  authController.verifyEmail,
+);
+
+router.get(
+  "/me",
+  authenticate, // Ensure the user is authenticated before accessing their profile
+  authController.me,
+);
 
 export default router;
