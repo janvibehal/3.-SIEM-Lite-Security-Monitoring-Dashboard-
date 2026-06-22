@@ -24,12 +24,12 @@ def run_all_detections():
     print("===== Detection Cycle Complete =====")
 
 
-schedule.every(60).seconds.do(run_all_detections)
+#schedule.every(60).seconds.do(run_all_detections)
 
 print("SIEM Analytics Engine Started...")
 
 run_all_detections()
 
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+#while True:
+#   schedule.run_pending()
+#   time.sleep(1)
