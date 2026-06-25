@@ -25,7 +25,7 @@ export class AuthController {
 
       res.cookie("siem_refresh_token", result.refreshToken, {
         httpOnly: true,
-        secure: true,
+        secure: false,
         sameSite: "strict",
       });
 
@@ -53,24 +53,27 @@ export class AuthController {
   };
 
   refresh = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const token = req.cookies.siem_refresh_token;
+  try {
+    console.log(req.cookies);
+    console.log(req.cookies.siem_refresh_token);
 
-      const result = await this.authService.refresh(token);
+    const token = req.cookies.siem_refresh_token;
 
-      res.cookie("siem_refresh_token", result.refreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "strict",
-      });
+    const result = await this.authService.refresh(token);
 
-      return res.status(200).json({
-        accessToken: result.accessToken,
-      });
-    } catch (error) {
-      next(error);
-    }
-  };
+    res.cookie("siem_refresh_token", result.refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "strict",
+    });
+
+    return res.status(200).json({
+      accessToken: result.accessToken,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
   forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -113,26 +116,19 @@ export class AuthController {
     }
   };
 
-  verifyEmail = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
-    const token =
-      req.query.token as string;
+  verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const token = req.query.token as string;
 
-    await this.authService.verifyEmail(
-      token,
-    );
+      await this.authService.verifyEmail(token);
 
-    return res.status(200).json({
-      message: "Email verified successfully",
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+      return res.status(200).json({
+        message: "Email verified successfully",
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 
   me = async (req: Request, res: Response, next: NextFunction) => {
     try {

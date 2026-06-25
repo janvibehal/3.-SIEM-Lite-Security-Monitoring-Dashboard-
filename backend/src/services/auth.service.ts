@@ -146,10 +146,7 @@ export class AuthService {
     await this.auditService.log({
       userId: user.id,
       action: "USER_REGISTERED",
-      metadata: {
-        ipAddress: req.ip,
-        userAgent: req.get("User-Agent"),
-      },
+      
     });
 
     // Return only necessary user info to avoid exposing sensitive data
@@ -186,10 +183,7 @@ export class AuthService {
       await this.auditService.log({
         userId: user.id,
         action: "LOGIN_FAILED",
-        metadata: {
-          ipAddress: req.ip,
-          userAgent: req.get("User-Agent"),
-        },
+      
       });
 
       throw new UnauthorizedError("Invalid credentials");
@@ -373,6 +367,7 @@ export class AuthService {
     const tokenHash = await hashPassword(token);
 
     await this.emailVerificationRepository.create({
+      tokenId:token,
       userId: user.id,
       tokenHash,
       expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
