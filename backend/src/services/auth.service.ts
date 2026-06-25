@@ -352,19 +352,19 @@ export class AuthService {
   // If not, it generates a random token, hashes it, and stores it in the database with an expiration time.
   // Finally, it sends the verification email to the user.
   async sendEmailVerification(userId: string) {
-    const user = await this.userRepository.findById(userId);
+  const user = await this.userRepository.findById(userId);
 
-    if (!user) {
-      throw new NotFoundError("User not found");
-    }
+  if (!user) {
+    throw new NotFoundError("User not found");
+  }
 
-    if (user.emailVerified) {
-      return;
-    }
+  if (user.emailVerified) {
+    return;
+  }
 
-    const token = crypto.randomBytes(32).toString("hex");
+  const tokenId = crypto.randomUUID();
 
-    const tokenHash = await hashPassword(token);
+  const token = crypto.randomBytes(32).toString("hex");
 
     await this.emailVerificationRepository.create({
       tokenId:token,
@@ -373,8 +373,15 @@ export class AuthService {
       expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
     });
 
-    await sendVerificationEmail(user.email, token);
-  }
+  await this.emailVerificationRepository.create({
+    userId: user.id,
+    tokenId,
+    tokenHash,
+    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+  });
+
+  await sendVerificationEmail(user.email, token);
+}
   //Method 9: verifyEmail()
   //This Method is used to verify the email of the user. It checks if the provided token is valid and not expired, marks it as used, and updates the user's email verification status.
   // If the token is invalid or expired, it throws an UnauthorizedError.
