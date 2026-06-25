@@ -50,6 +50,8 @@ model User {
 
   auditLogs AuditLog[] 
 
+  devices Device[]
+
   @@index([organizationId])
   @@index([email])
   @@index([username])
@@ -110,7 +112,6 @@ model EmailVerificationToken {
   @@map("email_verification_tokens")
 }
 
-
 model AuditLog {
   id String @id @default(uuid())
 
@@ -131,4 +132,95 @@ model AuditLog {
   @@index([userId])
   @@index([action])
   @@map("audit_logs")
+}
+
+
+
+
+
+
+enum DeviceType {
+  SERVER
+  WORKSTATION
+  FIREWALL
+  ROUTER
+  SWITCH
+  IDS
+  CLOUD
+  OTHER
+}
+
+enum DeviceStatus {
+  ONLINE
+  OFFLINE
+  UNKNOWN
+}
+
+model Device {
+  id             String       @id @default(uuid())
+
+  name           String
+  hostname       String
+  ipAddress      String
+
+  deviceType     DeviceType
+  status         DeviceStatus @default(UNKNOWN)
+
+  organizationId String
+
+  createdById    String
+  createdBy      User         @relation(fields: [createdById], references: [id])
+
+  logs Log[]
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+
+
+
+
+
+enum LogSeverity {
+  INFO
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum LogSource {
+  WINDOWS
+  LINUX
+  FIREWALL
+  APPLICATION
+  CLOUD
+  OTHER
+}
+
+model Log {
+  id                String        @id @default(uuid())
+
+  deviceId          String
+  device            Device        @relation(fields: [deviceId], references: [id])
+
+  severity          LogSeverity
+  source            LogSource
+
+  rawMessage        String
+  normalizedEvent   String?
+
+  sourceIp          String?
+  destinationIp     String?
+
+  eventTimestamp    DateTime
+
+  createdAt         DateTime      @default(now())
+
+  @@index([deviceId])
+  @@index([severity])
+  @@index([source])
+  @@index([eventTimestamp])
+
 }

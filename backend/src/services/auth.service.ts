@@ -145,7 +145,8 @@ export class AuthService {
     // In a real application, you might want to include more details like IP address, user agent, etc.
     await this.auditService.log({
       userId: user.id,
-      action: "USER_REGISTERED"
+      action: "USER_REGISTERED",
+      
     });
 
     // Return only necessary user info to avoid exposing sensitive data
@@ -182,6 +183,7 @@ export class AuthService {
       await this.auditService.log({
         userId: user.id,
         action: "LOGIN_FAILED",
+      
       });
 
       throw new UnauthorizedError("Invalid credentials");
@@ -364,7 +366,12 @@ export class AuthService {
 
   const token = crypto.randomBytes(32).toString("hex");
 
-  const tokenHash = await hashPassword(token);
+    await this.emailVerificationRepository.create({
+      tokenId:token,
+      userId: user.id,
+      tokenHash,
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    });
 
   await this.emailVerificationRepository.create({
     userId: user.id,

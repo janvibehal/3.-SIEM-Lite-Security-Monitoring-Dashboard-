@@ -1,8 +1,5 @@
-import { Request, Response, NextFunction }
-  from "express";
-
-import { Role }
-  from "@prisma/client";
+import { Request, Response, NextFunction } from "express";
+import { Role } from "@prisma/client";
 
 export const authorize =
   (...roles: Role[]) =>
@@ -13,13 +10,15 @@ export const authorize =
   ) => {
     if (!req.user) {
       return res.status(401).json({
-        message: "Unauthorized",
+        success: false,
+        message: "Authentication required.",
       });
     }
 
-    if (!roles.includes(req.user.role as Role)) {
+    if (!roles.includes(req.user.role)) {
       return res.status(403).json({
-        message: "Forbidden",
+        success: false,
+        message: "You do not have permission to perform this action.",
       });
     }
 
