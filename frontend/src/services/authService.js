@@ -1,7 +1,7 @@
 /**
  * authService.js
  * Matches EXACT backend endpoints, request payloads, and response shapes.
- * Based on: backend/src/routes/auth.routes.ts + controllers/auth.controller.ts + services/auth.service.ts
+ * Based on: backend/src/routes/auth.routes.ts
  *
  * Base URL: /api/v1/auth  (server.ts: app.use("/api/v1/auth", authRoutes))
  */
@@ -28,7 +28,6 @@ async function apiFetch(url, options = {}) {
   const data = await res.json();
 
   if (!res.ok) {
-    // Use backend message directly — it is user-safe per error definitions
     const err = new Error(data.message || "Request failed");
     err.statusCode = data.statusCode || res.status;
     err.error = data.error || "UnknownError";
@@ -40,18 +39,8 @@ async function apiFetch(url, options = {}) {
 
 /**
  * POST /api/v1/auth/register
- *
- * Request body (auth.validator.ts — registerSchema):
- *   { email: string, username: string, password: string }
- *
- * Password rules (from Zod schema):
- *   min 8 chars, must have [A-Z], [a-z], [0-9], [special char]
- *
- * Success 201:
- *   { success: true, data: { id, email, username, role } }
- *
- * Error shapes (from auth.service.ts):
- *   409 ConflictError  → "Email already exists" | "Username already exists"
+ * Request: { email, username, password }
+ * Success 201: { success: true, data: { id, email, username, role } }
  */
 export async function register({ email, username, password }) {
   return apiFetch(`${AUTH_BASE}/register`, {
@@ -62,19 +51,9 @@ export async function register({ email, username, password }) {
 
 /**
  * POST /api/v1/auth/login
- *
- * Request body (auth.validator.ts — loginSchema):
- *   { username: string, password: string }
- *   NOTE: login uses USERNAME not email — confirmed in auth.service.ts line:
- *   "const user = await this.userRepository.findByUsername(data.username)"
- *
- * Success 200:
- *   { accessToken: string, user: { id, email, username, role } }
- *   Cookie set: siem_refresh_token (httpOnly, secure, sameSite: strict)
- *
- * Error shapes:
- *   401 UnauthorizedError → "Invalid credentials"
- *   423 LockedError       → "Account is temporarily locked"
+ * Request: { username, password }
+ * Success 200: { accessToken, user: { id, email, username, role } }
+ * Cookie set: siem_refresh_token (httpOnly)
  */
 export async function login({ username, password }) {
   return apiFetch(`${AUTH_BASE}/login`, {
@@ -85,11 +64,7 @@ export async function login({ username, password }) {
 
 /**
  * POST /api/v1/auth/logout
- *
- * No request body — reads siem_refresh_token from httpOnly cookie.
- *
- * Success 200:
- *   { message: "Logged out successfully" }
+ * No body — reads siem_refresh_token from httpOnly cookie.
  */
 export async function logout() {
   return apiFetch(`${AUTH_BASE}/logout`, { method: "POST" });
@@ -97,12 +72,8 @@ export async function logout() {
 
 /**
  * POST /api/v1/auth/refresh
- *
- * No request body — reads siem_refresh_token from httpOnly cookie.
- *
- * Success 200:
- *   { accessToken: string }
- *   New siem_refresh_token cookie set.
+ * No body — reads siem_refresh_token from httpOnly cookie.
+ * Success 200: { accessToken }
  */
 export async function refreshToken() {
   return apiFetch(`${AUTH_BASE}/refresh`, { method: "POST" });
@@ -110,11 +81,8 @@ export async function refreshToken() {
 
 /**
  * GET /api/v1/auth/me
- *
- * Requires Authorization: Bearer <accessToken> header.
- *
- * Success 200:
- *   { data: { id, email, role, organizationId } }   (from JWT payload in req.user)
+ * Requires Authorization: Bearer <accessToken>
+ * Success 200: { data: { id, email, role, organizationId, ...rest } }
  */
 export async function getMe(accessToken) {
   return apiFetch(`${AUTH_BASE}/me`, {
@@ -127,11 +95,8 @@ export async function getMe(accessToken) {
 
 /**
  * POST /api/v1/auth/forgot-password
- *
- * Request body:
- *   { email: string }
- *
- * Success 200 (always — timing-safe, never reveals if email exists):
+ * Request: { email }
+ * Success 200 (always — timing-safe):
  *   { message: "If this email is registered, you will receive a reset link." }
  */
 export async function forgotPassword({ email }) {
@@ -143,16 +108,20 @@ export async function forgotPassword({ email }) {
 
 /**
  * POST /api/v1/auth/reset-password
- *
- * Request body (resetPasswordSchema — same password rules as register):
- *   { token: string, newPassword: string }
- *
- * Success 200:
- *   { message: "Password reset successful" }
+ * Request: { token, newPassword }
+ * Success 200: { message: "Password reset successful" }
  */
 export async function resetPassword({ token, newPassword }) {
   return apiFetch(`${AUTH_BASE}/reset-password`, {
     method: "POST",
     body: JSON.stringify({ token, newPassword }),
   });
+}
+
+/**
+ * GET /api/v1/auth/verify-email?token=<token>
+ * Success 200: { message: "Email verified successfully" }
+ */
+export async function verifyEmail(token) {
+  return apiFetch(`${AUTH_BASE}/verify-email?token=${encodeURIComponent(token)}`);
 }

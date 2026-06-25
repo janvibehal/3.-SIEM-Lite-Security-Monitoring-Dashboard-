@@ -145,11 +145,7 @@ export class AuthService {
     // In a real application, you might want to include more details like IP address, user agent, etc.
     await this.auditService.log({
       userId: user.id,
-      action: "USER_REGISTERED",
-      metadata: {
-        ipAddress: req.ip,
-        userAgent: req.get("User-Agent"),
-      },
+      action: "USER_REGISTERED"
     });
 
     // Return only necessary user info to avoid exposing sensitive data
@@ -186,10 +182,6 @@ export class AuthService {
       await this.auditService.log({
         userId: user.id,
         action: "LOGIN_FAILED",
-        metadata: {
-          ipAddress: req.ip,
-          userAgent: req.get("User-Agent"),
-        },
       });
 
       throw new UnauthorizedError("Invalid credentials");
@@ -358,28 +350,31 @@ export class AuthService {
   // If not, it generates a random token, hashes it, and stores it in the database with an expiration time.
   // Finally, it sends the verification email to the user.
   async sendEmailVerification(userId: string) {
-    const user = await this.userRepository.findById(userId);
+  const user = await this.userRepository.findById(userId);
 
-    if (!user) {
-      throw new NotFoundError("User not found");
-    }
-
-    if (user.emailVerified) {
-      return;
-    }
-
-    const token = crypto.randomBytes(32).toString("hex");
-
-    const tokenHash = await hashPassword(token);
-
-    await this.emailVerificationRepository.create({
-      userId: user.id,
-      tokenHash,
-      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-    });
-
-    await sendVerificationEmail(user.email, token);
+  if (!user) {
+    throw new NotFoundError("User not found");
   }
+
+  if (user.emailVerified) {
+    return;
+  }
+
+  const tokenId = crypto.randomUUID();
+
+  const token = crypto.randomBytes(32).toString("hex");
+
+  const tokenHash = await hashPassword(token);
+
+  await this.emailVerificationRepository.create({
+    userId: user.id,
+    tokenId,
+    tokenHash,
+    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+  });
+
+  await sendVerificationEmail(user.email, token);
+}
   //Method 9: verifyEmail()
   //This Method is used to verify the email of the user. It checks if the provided token is valid and not expired, marks it as used, and updates the user's email verification status.
   // If the token is invalid or expired, it throws an UnauthorizedError.
