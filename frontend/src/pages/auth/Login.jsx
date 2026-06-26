@@ -12,11 +12,11 @@
 
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import AuthLayout from "../components/auth/AuthLayout";
-import AuthInput from "../components/auth/AuthInput";
-import { Toast, useToast } from "../components/ui/Toast";
-import { useAuth } from "../context/AuthContext";
-import { login as apiLogin } from "../services/authService";
+import AuthLayout from "../../components/auth/AuthLayout";
+import AuthInput from "../../components/auth/AuthInput";
+import { Toast, useToast } from "../../components/ui/Toast";
+import { useAuth } from "../../context/AuthContext";
+import { login as apiLogin } from "../../services/authService";
 
 export default function Login() {
   const navigate = useNavigate();

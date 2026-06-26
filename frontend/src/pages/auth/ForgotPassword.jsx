@@ -10,11 +10,11 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import AuthLayout from "../components/auth/AuthLayout";
-import AuthInput from "../components/auth/AuthInput";
-import { Toast, useToast } from "../components/ui/Toast";
-import { forgotPassword } from "../services/authService";
-import { isEmailValid } from "../utils/passwordValidation";
+import AuthLayout from "../../components/auth/AuthLayout";
+import AuthInput from "../../components/auth/AuthInput";
+import { Toast, useToast } from "../../components/ui/Toast";
+import { forgotPassword } from "../../services/authService";
+import { isEmailValid } from "../../utils/passwordValidation";
 
 export default function ForgotPassword() {
   const { toast, showToast, clearToast } = useToast();

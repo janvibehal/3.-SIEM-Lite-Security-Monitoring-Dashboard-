@@ -4,8 +4,8 @@
  */
 
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import RoleBadge from "../components/ui/RoleBadge";
+import { useAuth } from "../../context/AuthContext";
+import RoleBadge from "../../components/user/RoleBadge";
 
 export default function Forbidden() {
   const navigate = useNavigate();

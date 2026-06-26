@@ -11,12 +11,12 @@
 
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import AuthLayout from "../components/auth/AuthLayout";
-import AuthInput from "../components/auth/AuthInput";
-import PasswordStrength from "../components/auth/PasswordStrength";
-import { Toast, useToast } from "../components/ui/Toast";
-import { resetPassword } from "../services/authService";
-import { isPasswordValid } from "../utils/passwordValidation";
+import AuthLayout from "../../components/auth/AuthLayout";
+import AuthInput from "../../components/auth/AuthInput";
+import PasswordStrength from "../../components/auth/PasswordStrength";
+import { Toast, useToast } from "../../components/ui/Toast";
+import { resetPassword } from "../../services/authService";
+import { isPasswordValid } from "../../utils/passwordValidation";
 
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();

@@ -15,12 +15,12 @@
 
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import AuthLayout from "../components/auth/AuthLayout";
-import AuthInput from "../components/auth/AuthInput";
-import PasswordStrength from "../components/auth/PasswordStrength";
-import { Toast, useToast } from "../components/ui/Toast";
-import { register as apiRegister } from "../services/authService";
-import { isPasswordValid, isUsernameValid, isEmailValid } from "../utils/passwordValidation";
+import AuthLayout from "../../components/auth/AuthLayout";
+import AuthInput from "../../components/auth/AuthInput";
+import PasswordStrength from "../../components/auth/PasswordStrength";
+import { Toast, useToast } from "../../components/ui/Toast";
+import { register as apiRegister } from "../../services/authService";
+import { isPasswordValid, isUsernameValid, isEmailValid } from "../../utils/passwordValidation";
 
 export default function Register() {
   const navigate = useNavigate();
