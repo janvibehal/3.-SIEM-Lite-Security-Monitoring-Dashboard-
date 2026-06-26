@@ -8,6 +8,7 @@ import cookieParser from "cookie-parser";
 import authRoutes from "./src/routes/auth.routes";
 import deviceRoutes from "./src/routes/device.routes";
 import logRoutes from "./src/routes/log.routes";
+import ruleRoutes from "./src/routes/rule.routes";
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ app.use(
     credentials: true,
   })
 );
+
 app.use(helmet());
 app.use(morgan("dev"));
 app.use(express.json());
@@ -27,6 +29,7 @@ app.use(cookieParser());
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/devices", deviceRoutes);
 app.use("/api/v1/logs", logRoutes);
+app.use("/api/v1/rules", ruleRoutes);
 
 app.get("/", (_, res) => {
   res.json({

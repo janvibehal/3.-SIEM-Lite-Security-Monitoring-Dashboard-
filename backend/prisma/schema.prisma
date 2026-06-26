@@ -224,3 +224,24 @@ model Log {
   @@index([eventTimestamp])
 
 }
+
+
+
+model DetectionRule {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+
+  eventType   String
+
+  threshold   Int
+
+  timeWindow  Int
+
+  severity    LogSeverity
+
+  enabled     Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

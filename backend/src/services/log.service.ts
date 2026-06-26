@@ -3,6 +3,7 @@ import { LogSeverity, LogSource } from "@prisma/client";
 import { LogRepository } from "../repositories/log.repository";
 import { DeviceRepository } from "../repositories/device.repository";
 import { AuditRepository } from "../repositories/audit.repository";
+import { normalizeLog } from "../normalization/logNormalizer";
 
 export class LogService {
   private logRepository = new LogRepository();
@@ -14,7 +15,6 @@ export class LogService {
     severity: LogSeverity;
     source: LogSource;
     rawMessage: string;
-    normalizedEvent?: string;
     sourceIp?: string;
     destinationIp?: string;
     eventTimestamp: Date;
@@ -22,11 +22,14 @@ export class LogService {
     ipAddress?: string;
   }) {
     // Verify device exists
+    
     const device = await this.deviceRepository.findById(data.deviceId);
 
     if (!device) {
       throw new Error("Device not found.");
     }
+
+    const normalizedEvent = normalizeLog(data.source, data.rawMessage);
 
     // Store log
     const log = await this.logRepository.create({
@@ -34,7 +37,7 @@ export class LogService {
       severity: data.severity,
       source: data.source,
       rawMessage: data.rawMessage,
-      normalizedEvent: data.normalizedEvent,
+      normalizedEvent,
       sourceIp: data.sourceIp,
       destinationIp: data.destinationIp,
       eventTimestamp: data.eventTimestamp,
@@ -57,46 +60,45 @@ export class LogService {
   }
 
   async searchLogs(
-  filters: {
-    deviceId?: string;
-    severity?: LogSeverity;
-    source?: LogSource;
-    startDate?: Date;
-    endDate?: Date;
-  },
-  options?: {
-    page?: number;
-    limit?: number;
-    sortBy?: "eventTimestamp" | "createdAt";
-    order?: "asc" | "desc";
-  }
-) {
-  const page = options?.page ?? 1;
+    filters: {
+      deviceId?: string;
+      severity?: LogSeverity;
+      source?: LogSource;
+      startDate?: Date;
+      endDate?: Date;
+    },
+    options?: {
+      page?: number;
+      limit?: number;
+      sortBy?: "eventTimestamp" | "createdAt";
+      order?: "asc" | "desc";
+    },
+  ) {
+    const page = options?.page ?? 1;
 
-  // Maximum page size = 100
-  const limit = Math.min(options?.limit ?? 20, 100);
+    // Maximum page size = 100
+    const limit = Math.min(options?.limit ?? 20, 100);
 
-  const sortBy = options?.sortBy ?? "eventTimestamp";
-  const order = options?.order ?? "desc";
+    const sortBy = options?.sortBy ?? "eventTimestamp";
+    const order = options?.order ?? "desc";
 
-  const { logs, total } =
-    await this.logRepository.search(filters, {
+    const { logs, total } = await this.logRepository.search(filters, {
       page,
       limit,
       sortBy,
       order,
     });
 
-  return {
-    logs,
-    pagination: {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-    },
-  };
-}
+    return {
+      logs,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
 
   async getLogById(id: string) {
     const log = await this.logRepository.findById(id);
