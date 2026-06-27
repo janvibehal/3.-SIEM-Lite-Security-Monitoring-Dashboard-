@@ -3,18 +3,18 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import RoleGuard from "./routes/RoleGuard";
 
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import VerifyEmail from "./pages/VerifyEmail";
-import Dashboard from "./pages/Dashboard";
-import Profile from "./pages/Profile";
-import Settings from "./pages/Settings";
-import Forbidden from "./pages/Forbidden";
-import NotFound from "./pages/NotFound";
+import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
+import VerifyEmail from "./pages/auth/VerifyEmail";
+import Dashboard from "./pages/dashboard/Dashboard";
+import Profile from "./pages/user/Profile";
+import Settings from "./pages/user/Settings";
+import Forbidden from "./pages/errors/Forbidden";
+import NotFound from "./pages/errors/NotFound";
 
-import DashboardLayout from "./components/layouts/DashboardLayout";
+import DashboardLayout from "./layouts/DashboardLayout";
 
 export default function App() {
   return (
@@ -40,9 +40,9 @@ export default function App() {
             <Route
               path="/settings"
               element={
-                <RoleGuard roles={["ADMIN", "ANALYST", "OPERATOR", "VIEWER"]}>
-                  <Settings />
-                </RoleGuard>
+              <RoleGuard allowed={["ADMIN", "ANALYST", "OPERATOR", "VIEWER"]}>
+                <Settings />
+              </RoleGuard>
               }
             />
           </Route>

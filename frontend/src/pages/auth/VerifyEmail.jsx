@@ -9,8 +9,8 @@
 
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import AuthLayout from "../components/auth/AuthLayout";
-import { verifyEmail } from "../services/authService";
+import AuthLayout from "../../components/auth/AuthLayout";
+import { verifyEmail } from "../../services/authService";
 
 const STATE = { LOADING: "loading", SUCCESS: "success", ERROR: "error", NO_TOKEN: "no_token" };
 

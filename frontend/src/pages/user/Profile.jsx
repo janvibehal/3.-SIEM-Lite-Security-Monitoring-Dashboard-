@@ -7,11 +7,11 @@
  */
 
 import { useState, useEffect } from "react";
-import { useAuth } from "../context/AuthContext";
-import { getMe } from "../services/authService";
-import UserAvatar from "../components/ui/UserAvatar";
-import RoleBadge from "../components/ui/RoleBadge";
-import VerificationBadge from "../components/ui/VerificationBadge";
+import { useAuth } from "../../context/AuthContext";
+import { getMe } from "../../services/authService";
+import UserAvatar from "../../components/user/UserAvatar";
+import RoleBadge from "../../components/user/RoleBadge";
+import VerificationBadge from "../../components/user/VerificationBadge";
 
 export default function Profile() {
   const { accessToken, user: ctxUser } = useAuth();

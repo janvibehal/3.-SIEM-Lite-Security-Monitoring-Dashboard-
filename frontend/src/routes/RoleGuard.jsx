@@ -22,7 +22,7 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-export default function RoleGuard({ allowed }) {
+export default function RoleGuard({ allowed, children }) {
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -34,7 +34,7 @@ export default function RoleGuard({ allowed }) {
     return <Navigate to="/403" replace />;
   }
 
-  return <Outlet />;
+  return children;
 }
 
 function RoleCheckingScreen() {

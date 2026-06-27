@@ -8,9 +8,9 @@
 
 import { useState, useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
-import { Toast, useToast } from "../ui/Toast";
-import UserDropdown from "../ui/UserDropdown";
+import { useAuth } from "../context/AuthContext";
+import { Toast, useToast } from "../components/ui/Toast";
+import UserDropdown from "../components/user/UserDropdown";
 
 const NAV_ITEMS = [
   { label: "Dashboard", icon: "grid",    path: "/dashboard" },

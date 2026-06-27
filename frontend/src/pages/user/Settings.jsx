@@ -6,10 +6,10 @@
  * Shows: session details, security info, role permissions.
  */
 
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import UserAvatar from "../components/ui/UserAvatar";
-import RoleBadge from "../components/ui/RoleBadge";
+import UserAvatar from "../../components/user/UserAvatar";
+import RoleBadge from "../../components/user/RoleBadge";
 
 // Role → capabilities mapping (display only)
 const ROLE_CAPABILITIES = {

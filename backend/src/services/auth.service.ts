@@ -130,21 +130,18 @@ export class AuthService {
     const passwordHash = await hashPassword(data.password);
 
     const user = await this.userRepository.create({
-      email: data.email,
-      username: data.username,
-      passwordHash,
-      organizationId: generateOrganizationId(),
-    });
+  email: data.email,
+  username: data.username,
+  passwordHash,
+  organizationId: generateOrganizationId(),
+});
 
-    // Send verification email after user creation
-    await this.sendEmailVerification(user.id);
+await this.sendEmailVerification(user.id);
 
-    // Log user registration event
-    // In a real application, you might want to include more details like IP address, user agent, etc.
-    await this.auditService.log({
-      userId: user.id,
-      action: "USER_REGISTERED",
-    });
+await this.auditService.log({
+  userId: user.id,
+  action: "USER_REGISTERED",
+});
 
     // Return only necessary user info to avoid exposing sensitive data
     return {
@@ -348,7 +345,10 @@ export class AuthService {
   // If not, it generates a random token, hashes it, and stores it in the database with an expiration time.
   // Finally, it sends the verification email to the user.
   async sendEmailVerification(userId: string) {
-    const user = await this.userRepository.findById(userId);
+
+  const user = await this.userRepository.findById(userId);
+
+  console.log("User email:", user?.email);
 
     if (!user) {
       throw new NotFoundError("User not found");
