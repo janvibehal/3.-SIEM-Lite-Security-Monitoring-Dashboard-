@@ -13,6 +13,8 @@ import Profile from "./pages/user/Profile";
 import Settings from "./pages/user/Settings";
 import Forbidden from "./pages/errors/Forbidden";
 import NotFound from "./pages/errors/NotFound";
+import AlertsPage from "./pages/dashboard/alert/Alerts";
+import LogsPage from "./pages/dashboard/log/Logs";
 
 import DashboardLayout from "./layouts/DashboardLayout";
 
@@ -34,8 +36,9 @@ export default function App() {
         <Route element={<ProtectedRoute />}>
           <Route element={<DashboardLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
-
+            <Route path="/alerts" element={<AlertsPage />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/logs" element={<LogsPage />} />
 
             <Route
               path="/settings"

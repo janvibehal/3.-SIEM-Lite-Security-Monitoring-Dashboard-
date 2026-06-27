@@ -1,38 +1,53 @@
 /**
  * RoleBadge.jsx
- * Displays a user role as a styled chip.
+ * Displays a user role as a styled chip with a clearance-tier indicator.
  * Backend roles: ADMIN | ANALYST | OPERATOR | VIEWER
  */
 
 const ROLE_STYLES = {
-  ADMIN:    "bg-red-500/10 text-red-400 border-red-500/30",
-  ANALYST:  "bg-purple-500/10 text-purple-400 border-purple-500/30",
-  OPERATOR: "bg-cyan-500/10 text-cyan-400 border-cyan-500/30",
-  VIEWER:   "bg-slate-500/10 text-slate-400 border-slate-500/30",
+  ADMIN:    "bg-[#1c1712] text-[#c9a36c] border-[#3a2f1f]",
+  ANALYST:  "bg-[#141a1f] text-[#8aa4bb] border-[#23303a]",
+  OPERATOR: "bg-[#131a17] text-[#7fa491] border-[#1f2e27]",
+  VIEWER:   "bg-[#15161a] text-[#8a8d93] border-[#26282d]",
 };
 
-const ROLE_ICONS = {
-  ADMIN:    "⬡",
-  ANALYST:  "◈",
-  OPERATOR: "◎",
-  VIEWER:   "◉",
+const ROLE_TIER = {
+  ADMIN: 4,
+  ANALYST: 3,
+  OPERATOR: 2,
+  VIEWER: 1,
 };
 
 export default function RoleBadge({ role, size = "sm" }) {
   if (!role) return null;
 
-  const style = ROLE_STYLES[role] ?? "bg-slate-500/10 text-slate-400 border-slate-500/30";
-  const icon  = ROLE_ICONS[role] ?? "○";
-  const text  = size === "lg"
-    ? "text-xs px-3 py-1"
-    : "text-[10px] px-2 py-0.5";
+  const style = ROLE_STYLES[role] ?? ROLE_STYLES.VIEWER;
+  const tier = ROLE_TIER[role] ?? 1;
+  const text = size === "lg" ? "text-xs px-3 py-1.5" : "text-[10px] px-2 py-1";
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 font-mono font-semibold tracking-widest uppercase border rounded-full ${style} ${text}`}
+      className={`inline-flex items-center gap-2 font-mono font-medium tracking-[0.15em] uppercase border rounded-md ${style} ${text}`}
     >
-      <span className="text-[9px] leading-none">{icon}</span>
+      <TierTicks tier={tier} />
       {role}
+    </span>
+  );
+}
+
+function TierTicks({ tier }) {
+  return (
+    <span className="inline-flex items-end gap-[2px]" aria-hidden="true">
+      {[1, 2, 3, 4].map((i) => (
+        <span
+          key={i}
+          className="w-[2.5px] rounded-[1px] bg-current"
+          style={{
+            height: `${3 + i * 1.5}px`,
+            opacity: i <= tier ? 1 : 0.22,
+          }}
+        />
+      ))}
     </span>
   );
 }

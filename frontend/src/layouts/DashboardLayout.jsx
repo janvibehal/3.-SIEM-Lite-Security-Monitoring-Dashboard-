@@ -38,29 +38,32 @@ export default function DashboardLayout() {
   const utcTime = clock.toISOString().replace("T", " ").slice(0, 19) + " UTC";
 
   return (
-    <div className="min-h-screen bg-slate-950 flex text-slate-200">
+    <div className="min-h-screen bg-[#0a0a0b] flex text-zinc-300">
       {/* ── Sidebar ───────────────────────────────────────────────────── */}
       <aside
         className={[
-          "fixed inset-y-0 left-0 z-40 w-60 bg-slate-900/95 border-r border-slate-800 flex flex-col",
+          "fixed inset-y-0 left-0 z-40 w-60 bg-[#0d0e10]/95 border-r border-[#1c1d20] flex flex-col",
           "transition-transform duration-300 lg:translate-x-0",
           sidebarOpen ? "translate-x-0" : "-translate-x-full",
         ].join(" ")}
       >
         {/* Brand */}
-        <div className="flex items-center gap-3 px-5 py-5 border-b border-slate-800">
-          <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center flex-shrink-0">
-            <ShieldCheckIcon className="w-4 h-4 text-cyan-400" />
-          </div>
-          <div>
-            <p className="text-sm font-bold text-white leading-none">SIEM Lite</p>
-            <p className="text-[10px] font-mono text-slate-600 mt-0.5">SOC Platform v1.0</p>
+        <div className="relative px-5 py-5 border-b border-[#1c1d20]">
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#b08d57] via-[#8a703f] to-transparent" />
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-md bg-[#1a1611] border border-[#3a2f1f] flex items-center justify-center flex-shrink-0">
+              <ShieldCheckIcon className="w-4 h-4 text-[#c9a36c]" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-zinc-100 leading-none tracking-tight">SIEM Lite</p>
+              <p className="text-[10px] font-mono text-zinc-600 mt-1 tracking-wide">SOC Platform v1.0</p>
+            </div>
           </div>
         </div>
 
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto py-4 px-3">
-          <p className="text-[10px] font-mono text-slate-700 uppercase tracking-widest px-2 mb-2">Navigation</p>
+          <p className="text-[10px] font-mono text-zinc-700 uppercase tracking-[0.2em] px-2 mb-2">Navigation</p>
           {NAV_ITEMS.map((item) => {
             const active = location.pathname === item.path;
             return (
@@ -69,12 +72,15 @@ export default function DashboardLayout() {
                 to={item.path}
                 onClick={() => setSidebarOpen(false)}
                 className={[
-                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors mb-0.5",
+                  "relative w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors mb-0.5",
                   active
-                    ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20"
-                    : "text-slate-500 hover:text-slate-300 hover:bg-slate-800",
+                    ? "bg-[#16140f] text-[#c9a36c]"
+                    : "text-zinc-500 hover:text-zinc-300 hover:bg-[#15161a]",
                 ].join(" ")}
               >
+                {active && (
+                  <span className="absolute left-0 top-1.5 bottom-1.5 w-[2px] bg-[#b08d57] rounded-full" aria-hidden="true" />
+                )}
                 <NavIcon name={item.icon} active={active} />
                 {item.label}
               </Link>
@@ -83,20 +89,22 @@ export default function DashboardLayout() {
         </nav>
 
         {/* Sidebar user footer */}
-        <div className="p-4 border-t border-slate-800">
+        <div className="p-4 border-t border-[#1c1d20]">
           <Link
             to="/profile"
             onClick={() => setSidebarOpen(false)}
-            className="flex items-center gap-3 rounded-lg px-2 py-1.5 hover:bg-slate-800 transition-colors group"
+            className="flex items-center gap-3 rounded-md px-2 py-1.5 hover:bg-[#15161a] transition-colors group"
           >
-            <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-cyan-400 flex-shrink-0">
+            <div className="w-8 h-8 rounded-full bg-[#16171a] border border-[#26282d] flex items-center justify-center text-xs font-semibold text-[#c9a36c] flex-shrink-0">
               {user?.username?.[0]?.toUpperCase() ?? "?"}
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-semibold text-white truncate group-hover:text-cyan-400 transition-colors">
+              <p className="text-xs font-medium text-zinc-200 truncate group-hover:text-[#c9a36c] transition-colors">
                 {user?.username ?? "—"}
               </p>
-              <p className="text-[10px] font-mono text-slate-600 truncate">{user?.role ?? "operator"}</p>
+              <p className="text-[10px] font-mono text-zinc-600 truncate uppercase tracking-wide">
+                {user?.role ?? "operator"}
+              </p>
             </div>
           </Link>
         </div>
@@ -105,7 +113,7 @@ export default function DashboardLayout() {
       {/* Sidebar overlay (mobile) */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-30 bg-slate-950/60 lg:hidden"
+          className="fixed inset-0 z-30 bg-black/60 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -113,29 +121,29 @@ export default function DashboardLayout() {
       {/* ── Main content ──────────────────────────────────────────────── */}
       <div className="flex-1 lg:ml-60 flex flex-col min-h-screen">
         {/* Top bar */}
-        <header className="sticky top-0 z-20 flex items-center justify-between h-14 px-5 bg-slate-950/90 backdrop-blur border-b border-slate-800">
+        <header className="sticky top-0 z-20 flex items-center justify-between h-14 px-5 bg-[#0a0a0b]/90 backdrop-blur border-b border-[#1c1d20]">
           <button
             onClick={() => setSidebarOpen((v) => !v)}
-            className="lg:hidden text-slate-500 hover:text-white transition-colors"
+            className="lg:hidden text-zinc-500 hover:text-zinc-100 transition-colors"
             aria-label="Open navigation"
           >
             <HamburgerIcon />
           </button>
 
-          <p className="hidden md:block text-xs font-mono text-slate-600 tracking-widest">
-            <span className="text-red-500 animate-pulse mr-1.5">●</span>
+          <p className="hidden md:block text-xs font-mono text-zinc-600 tracking-widest">
+            <span className="text-[#6b9080] motion-safe:animate-pulse mr-1.5">●</span>
             {utcTime}
           </p>
 
           <div className="flex items-center gap-3 ml-auto">
             <button
               onClick={() => showToast("23 active alerts require attention.", "error")}
-              className="relative flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-200 transition-colors font-mono border border-slate-800 hover:border-slate-700 rounded-lg px-3 py-1.5"
+              className="relative flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-200 transition-colors font-mono border border-[#1c1d20] hover:border-[#34363b] rounded-md px-3 py-1.5"
               aria-label="View alerts"
             >
               <BellIcon />
               <span>23</span>
-              <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+              <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#c4756b] motion-safe:animate-pulse" />
             </button>
 
             <UserDropdown />
@@ -185,7 +193,7 @@ function HamburgerIcon() {
 }
 
 function NavIcon({ name, active }) {
-  const color = active ? "#22d3ee" : "#64748b";
+  const color = active ? "#c9a36c" : "#71757c";
   const props = { width: 16, height: 16, viewBox: "0 0 24 24", fill: "none", stroke: color, strokeWidth: "1.8", strokeLinecap: "round", strokeLinejoin: "round" };
   if (name === "grid")    return <svg {...props}><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /></svg>;
   if (name === "bell")    return <svg {...props}><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>;
