@@ -18,9 +18,12 @@ const NAV_ITEMS = [
   { label: "Logs",      icon: "file",    path: "/logs"      },
   { label: "Devices",   icon: "monitor", path: "/devices"   },
   { label: "Rules",     icon: "code",    path: "/rules"     },
+  { label: "Incidents", icon: "clock", path: "/incidents" },
+  { label: "Analytics", icon: "bar", path: "/analytics" },
   { label: "Reports",   icon: "bar",     path: "/reports"   },
   { label: "Users",     icon: "users",   path: "/users"     },
-  { label: "Audit Log", icon: "clock",   path: "/audit"     },
+  { label: "Audit Logs", icon: "clock", path: "/audit-logs" },
+  ,
 ];
 
 export default function DashboardLayout() {
