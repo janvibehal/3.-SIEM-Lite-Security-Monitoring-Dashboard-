@@ -24,3 +24,5 @@ analytics/venv/
 venv/
 __pycache__/
 *.pyc
+
+coverage/
