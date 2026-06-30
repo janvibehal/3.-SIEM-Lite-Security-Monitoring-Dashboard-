@@ -4,5 +4,9 @@
     "lucide-react": "^1.21.0",
     "rabbitmq": "^0.0.2",
     "recharts": "^3.9.0"
+  },
+  "devDependencies": {
+    "@types/supertest": "^7.2.0",
+    "supertest": "^7.2.2"
   }
 }
